@@ -1,88 +1,106 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/WXeqVgks)
+
 # final-project-skeleton
 
-* Team Number:
-* Team Name:
-* Team Members:
-* GitHub Repository URL:
+* Team Number: 8
+* Team Name: Stayin Alive
+* Team Members: Shruthi A, Howard X, Zora M
+* GitHub Repository URL: https://github.com/upenn-embedded/final-project-s25-stayin-aliveThis project is a baby CPR machine that uses a crank-slider mechanism powered by a motor to perform real chest compressions, while a speaker relays real-time voice instructions and audio cues. The system also includes a heart rate sensor to determine the effectiveness of CPR and a user-controlled knob to adjust compression speed through an analog input. This device is designed to be a fully functional CPR machine for emergency infant care scenarios.
 * GitHub Pages Website URL: [for final submission]
 
 ## Final Project Proposal
 
 ### 1. Abstract
 
-*In a few sentences, describe your final project.*
+This project is a baby CPR machine that uses a crank-slider mechanism powered by a motor to perform real chest compressions, while a speaker relays real-time voice instructions and audio cues. The system also includes a heart rate sensor to determine the effectiveness of CPR and a user-controlled knob to adjust compression speed through an analog input. This device is designed to be a fully functional CPR machine for emergency infant care scenarios.
 
 ### 2. Motivation
 
-*What is the problem that you are trying to solve? Why is this project interesting? What is the intended purpose?*
+Sudden cardiac arrest in infants requires immediate and precise CPR. Manual CPR can be inconsistent and tiring, especially for untrained or stressed individuals. This device aims to provide an automated CPR solution for infants that ensures precise compression timing and force, giving caregivers and responders a reliable way to administer emergency resuscitation. It also provides audio feedback and celebrates success by playing a tune when a viable heartbeat is detected. There is significant unmet need in this product space, as existing devices only work on adults and have an exorbitant price range.
 
 ### 3. System Block Diagram
 
-*Show your high level design, as done in WS1 and WS2. What are the critical components in your system? How do they communicate (I2C?, interrupts, ADC, etc.)? What power regulation do you need?*
+![1742783473334](image/README/1742783473334.png)
 
 ### 4. Design Sketches
 
-*What will your project look like? Do you have any critical design features? Will you need any special manufacturing techniques to achieve your vision, like power tools, laser cutting, or 3D printing?*
+![1742783511104](image/README/1742783511104.png)
+
+##### Component Parts:
+
+* Base will house motor and crank-slider mechanism
+* Soft padded “suction cup” compressor on infant’s chest
+* Embedded speaker for instructional audio and success signal
+* External slider to control compression speed (via ADC)
+* Heart rate sensor placed on dummy or user to detect pulse
+
+Manufacturing Techniques: 3D printing (housing, crank slider mechanism part)
 
 ### 5. Software Requirements Specification (SRS)
 
-*Formulate key software requirements here. Think deeply on the design: What must your device do? How will you measure this during validation testing? Create 4 to 8 critical system requirements.*
-
-*These must be testable! See the Final Project Manual Appendix for details. Refer to the table below; replace these examples with your own.*
-
-**5.1 Definitions, Abbreviations**
-
-Here, you will define any special terms, acronyms, or abbreviations you plan to use for hardware
-
 **5.2 Functionality**
 
-| ID     | Description                                                                                                                                                                                                              |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| SRS-01 | The IMU 3-axis acceleration will be measured with 16-bit depth every 100 milliseconds +/-10 milliseconds                                                                                                                 |
-| SRS-02 | The distance sensor shall operate and report values at least every .5 seconds.                                                                                                                                           |
-| SRS-03 | Upon non-nominal distance detected (i.e., the trap mechanism has changed at least 10 cm from the nominal range), the system shall be able to detect the change and alert the user in a timely manner (within 5 seconds). |
-| SRS-04 | Upon a request from the user, the system shall get an image from the internal camera and upload the image to the user system within 10s.                                                                                 |
+| ID    | Description                                                                                                                                  |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| SRS-1 | Timing 100-120 compressions per minute via PWM.                                                                                              |
+| SRS-2 | Input capture to time when to stop compressions (and begin simulator “breaths”?). Should be around 15 seconds in the compression sequence. |
+| SRS-3 | ADC from input slider pin to modulate compression frequency.                                                                                 |
+| SRS-4 | Voice instructions synchronization with motor operations.                                                                                    |
+| SRS-5 | Start/stop button pin change interruptions to initiate and emergency stop compressions.                                                      |
+| SRS-6 | Polling/interrupting heart rate sensor for stable heart rate.                                                                                |
 
-### 6. Hardware Requirements Specification (HRS)
 
-*Formulate key hardware requirements here. Think deeply on the design: What must your device do? How will you measure this during validation testing? Create 4 to 8 critical system requirements.*
-
-*These must be testable! See the Final Project Manual Appendix for details. Refer to the table below; replace these examples with your own.*
-
-**6.1 Definitions, Abbreviations**
-
-Here, you will define any special terms, acronyms, or abbreviations you plan to use for hardware
+### Hardware Requirements Specification (SRS)
 
 **6.2 Functionality**
 
-| ID     | Description                                                                                                                        |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| HRS-01 | A distance sensor shall be used for obstacle detection. The sensor shall detect obstacles at a maximum distance of at least 10 cm. |
-| HRS-02 | A noisemaker shall be inside the trap with a strength of at least 55 dB.                                                           |
-| HRS-03 | An electronic motor shall be used to reset the trap remotely and have a torque of 40 Nm in order to reset the trap mechanism.      |
-| HRS-04 | A camera sensor shall be used to capture images of the trap interior. The resolution shall be at least 480p.                       |
+| ID    | Description                                                                                                                                 |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| HRS-1 | Timing 100-120 compressions per minute via PWM                                                                                              |
+| HRS-2 | Input capture to time when to stop compressions (and begin simulator “breaths”?). Should be around 15 seconds in the compression sequence |
+| HRS-3 | Slider shall vary compression speed with ADC values                                                                                         |
+| HRS-4 | Heart rate sensor shall detect a stable BPM range for success feedback, and the BPM shall be within +-5 BPM of the true value               |
+| HRS-5 | Compression precision shall be within ±10% of the reported compression cadence                                                             |
+| HRS-6 | The system shall be durable enough for 100+ compressions                                                                                    |
 
 ### 7. Bill of Materials (BOM)
 
-*What major components do you need and why? Try to be as specific as possible. Your Hardware & Software Requirements Specifications should inform your component choices.*
+Bill of Materials (BOM):
 
-*In addition to this written response, copy the Final Project BOM Google Sheet and fill it out with your critical components (think: processors, sensors, actuators). Include the link to your BOM in this section.*
+For our power management system, we either need a transformer to plug into the wall or a power bank large enough to power the compression system for a reasonable period of time, potentially in addition to a buck converter. This system will drive a powerful motor to perform the compressions. A slider will serve as input to adjust the rate of compressions, and a heart rate monitor will monitor the patient’s heart rate to stop compressions if the heart begins beating on its own. The system will also require a speaker to broadcast setup instructions to the user.
+
+Google Sheet Link: [Stayin Alive BOM](https://docs.google.com/spreadsheets/d/1mnzUDWP4vnuGuvyL37jHFhGkMG1HrnNbu7oACL51q40/edit?usp=sharing)
 
 ### 8. Final Demo Goals
 
-*How will you demonstrate your device on demo day? Will it be strapped to a person, mounted on a bicycle, require outdoor space? Think of any physical, temporal, and other constraints that could affect your planning.*
+Final Demo
+
+* Device will be placed on baby mannequin
+* Demonstrates automatic compressions with adjustable speed using the knob
+* Plays CPR instructions through speaker
+* Detects existence of pulse using heart sensor (test via human finger) and plays celebratory tune upon success
+
+Constraints:
+
+* No damaging doll
+* Can attach doll to machine within 30 seconds
 
 ### 9. Sprint Planning
 
 *You've got limited time to get this project done! How will you plan your sprint milestones? How will you distribute the work within your team? Review the schedule in the final project manual for exact dates.*
 
-| Milestone  | Functionality Achieved | Distribution of Work |
-| ---------- | ---------------------- | -------------------- |
-| Sprint #1  |                        |                      |
-| Sprint #2  |                        |                      |
-| MVP Demo   |                        |                      |
-| Final Demo |                        |                      |
+| Milestone  | Functionality Achieved                                                        |
+| ---------- | ----------------------------------------------------------------------------- |
+| Sprint #1  | Finalize mechanical + source components, begin microcontroller setup          |
+| Sprint #2  | Assemble crank-slider, basic motor test, integrate ADC knob for speed control |
+| MVP Demo   | Integrate heart sensor, write logic for pulse detection and feedback audio    |
+| Final Demo | Final testing, polish demo and final presentation                             |
+
+Team Roles:
+
+* Shruti: Embedded code (PWM/audio/button/ADC/heart logic)
+* Zora: CAD and physical assembly of crank slider mechanism
+* Howard: Electrical + power system + audio integration
 
 **This is the end of the Project Proposal section. The remaining sections will be filled out based on the milestone schedule.**
 
