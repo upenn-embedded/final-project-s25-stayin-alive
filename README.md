@@ -49,7 +49,6 @@ Manufacturing Techniques: 3D printing (housing, crank slider mechanism part)
 | SRS-5 | Start/stop button pin change interruptions to initiate and emergency stop compressions.                                                      |
 | SRS-6 | Polling/interrupting heart rate sensor for stable heart rate.                                                                                |
 
-
 ### Hardware Requirements Specification (SRS)
 
 **6.2 Functionality**
@@ -108,9 +107,38 @@ Team Roles:
 
 ### Last week's progress
 
+We worked on the crank slider mechanism which will be performing the compression motion. CAD pictures below:
+
+![1744155946596](image/README/1744155946596.png)
+
+Each team member was responsible for a different part of the mechanism.
+
+Zora: crank cylinder
+
+Howard: slider mount block
+
+Shruti: slider
+
 ### Current state of project
 
+We are finishing up the CAD and getting ready to 3d print, making sure the measurements align with the pololu motor we are using. We hope to finish 3D printing by the end of the week. This is only the first part of the necessary functionality we hope to implement, though. In terms of hardware, we have ordered everything we need, we just need to coordinate with Detkin/the other groups to ensure we receive all of the parts (team number mix up).
+
 ### Next week's plan
+
+We want to finish 3D printing.
+
+* Estimated Time: 1 hour
+* Assigned Team Member: Zora
+
+We would like to connect and test the motor with the crank slider mechanism. 
+
+* Estimated Time: 2-3 hours
+* Assigned team members: all
+
+Additionally, we would like to implement the code needed to finish the compression mechanism part.
+
+* Estimated Time: 2 hours
+* Assigned team member: all
 
 ## Sprint Review #2
 
