@@ -130,7 +130,7 @@ We want to finish 3D printing.
 * Estimated Time: 1 hour
 * Assigned Team Member: Zora
 
-We would like to connect and test the motor with the crank slider mechanism. 
+We would like to connect and test the motor with the crank slider mechanism.
 
 * Estimated Time: 2-3 hours
 * Assigned team members: all
@@ -144,9 +144,15 @@ Additionally, we would like to implement the code needed to finish the compressi
 
 ### Last week's progress
 
+We finished CAD-ing all the files and were able to put together the crank slider mechanism. We also starting coding instructions to drive the PWM-driven compressions. 
+
 ### Current state of project
 
+Here is a video with our finished CAD files, showing how the mechanism would ideally work. 
+
 ### Next week's plan
+
+Our plan for next week includes finishing the PWM-driven compressions, as well as adding ADC for our knob controll of the actual speed of compressions. If we receive out speaker, we will investigate how to communicate instructions via the audio module we purchased. 
 
 ## MVP Demo
 
