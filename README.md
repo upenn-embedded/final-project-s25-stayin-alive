@@ -5,7 +5,8 @@
 * Team Number: 8
 * Team Name: Stayin Alive
 * Team Members: Shruthi A, Howard X, Zora M
-* GitHub Repository URL: https://github.com/upenn-embedded/final-project-s25-stayin-aliveThis project is a baby CPR machine that uses a crank-slider mechanism powered by a motor to perform real chest compressions, while a speaker relays real-time voice instructions and audio cues. The system also includes a heart rate sensor to determine the effectiveness of CPR and a user-controlled knob to adjust compression speed through an analog input. This device is designed to be a fully functional CPR machine for emergency infant care scenarios.
+* GitHub Repository URL: https://github.com/upenn-embedded/final-project-s25-stayin-alive
+* This project is a baby CPR machine that uses a crank-slider mechanism powered by a motor to perform real chest compressions, while a speaker relays real-time voice instructions and audio cues. The system also includes a heart rate sensor to determine the effectiveness of CPR and a user-controlled knob to adjust compression speed through an analog input. This device is designed to be a fully functional CPR machine for emergency infant care scenarios.
 * GitHub Pages Website URL: [for final submission]
 
 ## Final Project Proposal
@@ -144,15 +145,15 @@ Additionally, we would like to implement the code needed to finish the compressi
 
 ### Last week's progress
 
-We finished CAD-ing all the files and were able to put together the crank slider mechanism. We also starting coding instructions to drive the PWM-driven compressions. 
+We finished CAD-ing all the files and were able to put together the crank slider mechanism. We also starting coding instructions to drive the PWM-driven compressions. This file is attached in our Github repository. 
 
 ### Current state of project
 
-Here is a video with our finished CAD files, showing how the mechanism would ideally work. 
+Here is a video with our finished CAD files, showing how the mechanism would ideally work: https://drive.google.com/file/d/1BcY2H6HLj2-3rJgRCMZpnzcnL9ISp_Vk/view?usp=sharing
 
 ### Next week's plan
 
-Our plan for next week includes finishing the PWM-driven compressions, as well as adding ADC for our knob controll of the actual speed of compressions. If we receive out speaker, we will investigate how to communicate instructions via the audio module we purchased. 
+Our plan for next week includes finishing the PWM-driven compressions, as well as adding ADC for our knob controll of the actual speed of compressions. If we receive out speaker, we will investigate how to communicate instructions via the audio module we purchased.
 
 ## MVP Demo
 
