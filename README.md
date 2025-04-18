@@ -173,8 +173,8 @@ Our plan for next week includes finishing the PWM-driven compressions, as well a
 
    https://drive.google.com/file/d/18KjJh7z2JQtU2WsWvnEp5noG2TvVmWYm/view?usp=drivesdk
 
-Math (BPM corresponding to encoder PWM frequency):
-   2250*60/1120 = 120.5357142857
+   Math (BPM corresponding to encoder PWM frequency):
+   2250*60/1120 = 120.5357142857,
    1900*60/1120 101.7857142857
 
    **SRS-4: Voice instructions synchronization with motor operations.** We've achieved this. Attached is a video displaying how the audio controls synchronize with motor operations.
