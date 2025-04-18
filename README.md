@@ -165,11 +165,17 @@ Our plan for next week includes finishing the PWM-driven compressions, as well a
 3. Demo your device.
 4. Have you achieved some or all of your Software Requirements Specification (SRS)?
 
-   **SRS-1: Timing 100-120 compressions per minute via PWM.** We've achieved this by testing different duty cycles, determining that a duty cycle within the 40-50% range achieves this BPM. We've attached an image of the oscilloscope, showing the rate of compressions captured of the motor per second (scaled up by a factor of 1120). According to the specifications of the encoder, one rotation of the motor is equivalent to 1120 ticks. We've used the serial terminal to display the final PWM.
+   **SRS-1: Timing 100-120 compressions per minute via PWM.** We've achieved this by testing different duty cycles, determining that a duty cycle within the 40-50% range achieves this BPM. We've attached an image of the oscilloscope, showing the rate of compressions captured of the motor per second (scaled up by a factor of 1120). According to the specifications of the encoder, one rotation of the motor is equivalent to 1120 ticks. We've used the serial terminal to display the final BPM (see video under SRS-3).
 
    **SRS-2: Input capture to time when to stop compressions (and begin simulator “breaths”?). Should be around 15 seconds in the compression sequence.** We have not achieved this, because we decided we are going to stick to a compression sequence, rather than a compression/breathing sequence. Therefore, we are letting go of this requirement.
 
    **SRS-3: ADC from input slider pin to modulate compression frequency.** We achieved this using PC0 to measure the ADC value received from our joystick input device; this week, we intend to switch this joystick for a slider. Attached is a video displaying the changing compression speed with a changing ADC value.
+
+   https://drive.google.com/file/d/18KjJh7z2JQtU2WsWvnEp5noG2TvVmWYm/view?usp=drivesdk
+
+Math (BPM corresponding to encoder PWM frequency):
+   2250*60/1120 = 120.5357142857
+   1900*60/1120 101.7857142857
 
    **SRS-4: Voice instructions synchronization with motor operations.** We've achieved this. Attached is a video displaying how the audio controls synchronize with motor operations.
 
@@ -177,21 +183,27 @@ Our plan for next week includes finishing the PWM-driven compressions, as well a
 
    **SRS-6: Polling/interrupting heart rate sensor for stable heart rate.** We have not achieved this requirement yet. Given our other objectives, we will make a judgement call as to whether we will have enough runway to complete this.
 
-5. Have you achieved some or all of your Hardware Requirements Specification (HRS)?
+6. Have you achieved some or all of your Hardware Requirements Specification (HRS)?
 
-   **HRS-1:** **Motor and crank mechanism shall produce 1.5 inches of vertical motion.** We've altered this objective to account for our miniature baby doll, to make the depth 0.75 inches (19mm). Attached is a CAD screenshot showing the depth of the groove of our crank-slider mechanism.
+   **HRS-1:** **Motor and crank mechanism shall produce 1.5 inches of vertical motion.** We've altered this objective to account for our miniature baby doll (which does not compress very far due to its small size), to make the depth 0.75 inches (19mm). Attached is a CAD screenshot showing the depth of the groove of our crank-slider mechanism.
+   
+   <img width="581" alt="PNG image" src="https://github.com/user-attachments/assets/fd779a98-1159-4f63-96bc-62103fc9ed09" />
 
-   **HRS-2:** **Speaker shall be audible in a noisy environment (>~70 dB output).** We've achieved this objective. Attached is a screenshot displaying the detected decibel value of our environment.
 
-   **HRS-3: Slider shall vary compression speed with ADC values.** We've achieved this objective. Same video at software requirements SRS-3.
+   **HRS-2:** **Speaker shall be audible in a noisy environment (>~70 dB output).** We've achieved this objective. Attached is a screenshot displaying the detected decibel value of Detkin during our audio testing.
 
-   **HRS-4: Heart rate sensor shall detect a stable BPM range for success feedback, and the BPM shall be within +-5 BPM of the true value.** We have not achieved this objective, as we are still deciding whether the heart rate sensor is a viable addition. It appears to require using Arduino, which is beyond the scope of our final project requirements. Given the time, we will explore a workaround.
+![IMG_4337](https://github.com/user-attachments/assets/2311e280-9195-4949-bc87-fab6b7d8cf40)
+
+
+   **HRS-3: Slider shall vary compression speed with ADC values.** We've achieved this objective. See video under software requirement SRS-3.
+
+   **HRS-4: Heart rate sensor shall detect a stable BPM range for success feedback, and the BPM shall be within +-5 BPM of the true value.** We have not achieved this objective, as we are still deciding whether the heart rate sensor is a viable addition. It appears to require using Arduino, which is beyond the scope of our final project requirements. If we have the time, we will explore a workaround.
 
    **HRS-5: The reported compression cadence shall be within ±10% of the desired compression range of 100-120BPM.** We've achieved this objective. The video attached in SRS-1 displays the range of reported compression speeds between 102-121BPM, which aligns with our precision requirements.
 
    **HRS-6: The system shall be durable enough for 100+ compressions.** We've tested this independently, and our system experiences no wear after 100+ compressions.
 
-6. Show off the remaining elements that will make your project whole: mechanical casework, supporting graphical user interface (GUI), web portal, etc.
+8. Show off the remaining elements that will make your project whole: mechanical casework, supporting graphical user interface (GUI), web portal, etc.
 
    Attached are images of each component of the project, including the casework, compressions, and voice module.
 
@@ -199,9 +211,9 @@ Our plan for next week includes finishing the PWM-driven compressions, as well a
 
    ![1744995051135](image/README/1744995051135.png)
 
-7. What is the riskiest part remaining of your project? How do you plan to de-risk this?
+9. What is the riskiest part remaining of your project? How do you plan to de-risk this?
    Although a fairly safe undertaking, the remaining riskiest part of our project lies in integrating the heart rate sensor. Being able to detect an accurate pulse is crucial to be able to know when exactly to stop the compressions. With an incorrect reading, we may prolong or truncate compressions, which, in a real-world scenario, may lead to undesirable outcomes. To de-risk this, we will thoroughly test our heart rate detection procedure.
-8. What questions or help do you need from the teaching team?
+10. What questions or help do you need from the teaching team?
 
    We may need help setting up our heart rate sensor to perform accurate readings. It appears that it requires an external C library, which we're having trouble integrating.
 
