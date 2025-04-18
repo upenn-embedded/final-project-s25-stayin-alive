@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "uart.h"
+#include <avr/interrupt.h>
 
 #define F_CPU 16000000UL  // 16 MHz clock frequency.
 #define MOTOR_PIN PB1     // OC1A output pin; used to switch the motor's ground side.
@@ -9,7 +10,9 @@
 #define MAX_DUTY 50
 #define MIN_DUTY 40
 
-#define FIRST_INSTR PB0
+#define ENCODER PB0
+
+volatile int tickCount = 0;
 
 // Initialize PWM on Timer1 (mode 14: Fast PWM with ICR1 as TOP)
 // This configuration provides a PWM frequency of approximately 20 kHz.
@@ -29,7 +32,8 @@ void pwm_init(void) {
 }
 
 // Set the PWM duty cycle (0 to 100%).
-void set_pwm_duty_cycle(uint8_t duty_percent) {
+
+void set_pwm_duty_cycle(uint8_t duty_percent) { // default sets duty to 0, will have motor action.
     if (duty_percent > 100)
         duty_percent = 100;
     
@@ -87,37 +91,110 @@ void init_adc() {
      
  }
 
+void encoder_init() {
+    // input capture setup for encoder
+    
+    // External interrupt 0 (pin d2) fire on rising edge
+    DDRD  &= ~(1 << DDD2);    // PD2 as input
+    PORTD |=  (1 << PORTD2);  // enable pull?up (if you don?t have an external pull?down)
 
+    EICRA |= ((1 << ISC00) | (1 << ISC01)); // rising edge
+    EIMSK |= (1 << INT0); // enable int0
+    
+    //scale timer 1 down to 15.625kHz
+    TCCR3B |= ((1 << CS30) | (1 << CS32));
+    TCCR3B &= ~(1 << CS31);
+    
+//     set timer 1 to normal (just count up, not pwm or CTC)
+    TCCR3A &= ~((1 << WGM30) | (1 << WGM31));
+    TCCR3B &= ~((1 << WGM32) | (1 << WGM33));
+    
+    // set timer to 0
+    TCNT3 = 0;
+    
+    sei();
+}
 
+ISR(INT0_vect) {
+    tickCount++; // more encoder tick counts
+}
+
+volatile int rpmNew = 0;
+volatile int rpmOld = 0;
+
+ISR(TIMER3_OVF_vect) {
+    rpmNew == 0; // no rpm (or below 15)
+}
+
+void stop() {
+
+    if (tickCount > 560) {
+        set_pwm_duty_cycle(0);
+        while(tickCount < 1170 && (ADC < 900 && ADC > 100)) {
+        }
+        while (tickCount < 2205 && (ADC < 900 && ADC > 100)) {
+        }
+        pwm_disable();
+        _delay_ms(1000);
+        printf("tick count: %d\n", tickCount);
+    }
+}
 
 int main(void) {
     // Initialize the PWM hardware.
-    pwm_init();
+    
+    pwm_init(); // turns on PWM w TOP = 0 but still signal.
+    pwm_disable();
     init_adc();
     uart_init();
-   
-    
+    encoder_init();
 
     // Pre-set the PWM duty cycle to 50% for the "on" period.
-    set_pwm_duty_cycle(50);
-    pwm_enable();
+//    set_pwm_duty_cycle(50, T > 4 sec);
+    
     while (1) {
         
-        printf("ADC value: %d\n", ADC);
-        
-        set_pwm_duty_cycle(ADC / 20);
-       
-        if (ADC > 526) { // paddle up
-            set_pwm_duty_cycle(MAX_DUTY);
-        } else if (ADC < 200) {
-            set_pwm_duty_cycle(10);
-        } else {
-            set_pwm_duty_cycle(0);
+        if (tickCount >= 1120) {
+            tickCount = 0 + tickCount - 1120;
+            rpmNew = 15625.0 * 60.0 / TCNT3;
+            TCNT3 = 0;
         }
-    }
+        
+        if (rpmNew != rpmOld) {
+//            printf("Compression RPM: %d\n", rpmNew);
+            rpmOld = rpmNew;
+        }
+        
+//        printf("ADC value: %d\n", ADC);
 
-    pwm_disable();
+//        set_pwm_duty_cycle(ADC / 20);
+
+//        actual
+        if (ADC > 1016) { // paddle up
+            pwm_enable();
+            set_pwm_duty_cycle(MAX_DUTY);
+        } else if (ADC < 20) {
+            pwm_enable();
+            set_pwm_duty_cycle(10); // motor spins, but! Controllable!
+        } else {
+            stop();
+        }
+        
+        //manual tuning
+//        if (ADC > 1016) { // paddle up
+//            pwm_enable();
+//            set_pwm_duty_cycle(0);
+//        } else if (ADC < 20) {
+//            pwm_enable();
+//            set_pwm_duty_cycle(0); // motor spins, but! Controllable!
+//        } else {
+//            pwm_disable();
+//        }
+        
+     }
+
+    // pwm_disable();
 
     
-    return 0;
+    // return 0;
 }
