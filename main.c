@@ -128,16 +128,15 @@ ISR(TIMER3_OVF_vect) {
 
 void stop() {
 
-    if (tickCount > 560) {
-        set_pwm_duty_cycle(0);
-        while(tickCount < 1170 && (ADC < 900 && ADC > 100)) {
-        }
-        while (tickCount < 2205 && (ADC < 900 && ADC > 100)) {
-        }
+//    if (tickCount > 560) {
+//        set_pwm_duty_cycle(0);
+//        while(tickCount < 1170 && (ADC < 900 && ADC > 100)) {
+//        }
+//        while (tickCount < 2205 && (ADC < 900 && ADC > 100)) {
+//        }
         pwm_disable();
-        _delay_ms(1000);
-        printf("tick count: %d\n", tickCount);
-    }
+//        _delay_ms(1000);
+//    }
 }
 
 int main(void) {
@@ -161,26 +160,31 @@ int main(void) {
         }
         
         if (rpmNew != rpmOld) {
-//            printf("Compression RPM: %d\n", rpmNew);
+            printf("Compression RPM: %d\n", rpmNew);
+            printf("ADC value: %d\n", ADC);
             rpmOld = rpmNew;
         }
         
-//        printf("ADC value: %d\n", ADC);
+        
 
 //        set_pwm_duty_cycle(ADC / 20);
 
-//        actual
+//        MODE: actual // howard eats ass 
+        
+        
+        // every day 
+        
         if (ADC > 1016) { // paddle up
             pwm_enable();
-            set_pwm_duty_cycle(MAX_DUTY);
+            set_pwm_duty_cycle(55);
         } else if (ADC < 20) {
             pwm_enable();
-            set_pwm_duty_cycle(10); // motor spins, but! Controllable!
+            set_pwm_duty_cycle(41); 
         } else {
             stop();
         }
         
-        //manual tuning
+        //MODE: manual tuning
 //        if (ADC > 1016) { // paddle up
 //            pwm_enable();
 //            set_pwm_duty_cycle(0);
@@ -190,6 +194,7 @@ int main(void) {
 //        } else {
 //            pwm_disable();
 //        }
+        
         
      }
 
