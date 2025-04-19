@@ -178,6 +178,8 @@ Our plan for next week includes finishing the PWM-driven compressions, as well a
    1900 x 60 / 1120 = 101.7857142857
 
    **SRS-4: Voice instructions synchronization with motor operations.** We've achieved this. Attached is a video displaying how the audio controls synchronize with motor operations.
+   https://drive.google.com/file/d/1d2OzKgbDKBN98MRBmpH-0eDDmVQTMjfH/view?usp=drivesdk
+   https://drive.google.com/file/d/1HsucxccEQHHMFxV_PzVdPIGKXBBRkYkZ/view?usp=drivesdk
 
    **SRS-5: Start/stop button pin change interruptions to initiate and emergency stop compressions.** We have not achieved this requirement yet, but it is on our todo-list for this week.
 
@@ -190,7 +192,7 @@ Our plan for next week includes finishing the PWM-driven compressions, as well a
    <img width="581" alt="PNG image" src="https://github.com/user-attachments/assets/fd779a98-1159-4f63-96bc-62103fc9ed09" />
 
 
-   **HRS-2:** **Speaker shall be audible in a noisy environment (>~70 dB output).** We've achieved this objective. Attached is a screenshot displaying the detected decibel value of Detkin during our audio testing.
+   **HRS-2:** **Speaker shall be audible in a noisy environment (>~70 dB output).** We've achieved this objective. Attached is a screenshot displaying the detected decibel value of Detkin during our audio testing. You can listen to the speaker in action in the videos under SRS-4.
 
 ![IMG_4337](https://github.com/user-attachments/assets/2311e280-9195-4949-bc87-fab6b7d8cf40)
 
