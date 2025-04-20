@@ -41,27 +41,27 @@ Manufacturing Techniques: 3D printing (housing, crank slider mechanism part)
 
 **5.2 Functionality**
 
-| ID    | Description                                                                                                                                |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| SRS-1 | Timing 100-120 compressions per minute via PWM.                                                                                            |
+| ID    | Description                                                                                                                                  |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| SRS-1 | Timing 100-120 compressions per minute via PWM.                                                                                              |
 | SRS-2 | Input capture to time when to stop compressions (and begin simulator “breaths”?). Should be around 15 seconds in the compression sequence. |
-| SRS-3 | ADC from input slider pin to modulate compression frequency.                                                                               |
-| SRS-4 | Voice instructions synchronization with motor operations.                                                                                  |
-| SRS-5 | Start/stop button pin change interruptions to initiate and emergency stop compressions.                                                    |
-| SRS-6 | Polling/interrupting heart rate sensor for stable heart rate.                                                                              |
+| SRS-3 | ADC from input slider pin to modulate compression frequency.                                                                                 |
+| SRS-4 | Voice instructions synchronization with motor operations.                                                                                    |
+| SRS-5 | Start/stop button pin change interruptions to initiate and emergency stop compressions.                                                      |
+| SRS-6 | Polling/interrupting heart rate sensor for stable heart rate.                                                                                |
 
 ### Hardware Requirements Specification (SRS)
 
 **6.2 Functionality**
 
-| ID    | Description                                                                                                                               |
-| ----- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| HRS-1 | Timing 100-120 compressions per minute via PWM                                                                                            |
+| ID    | Description                                                                                                                                 |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| HRS-1 | Timing 100-120 compressions per minute via PWM                                                                                              |
 | HRS-2 | Input capture to time when to stop compressions (and begin simulator “breaths”?). Should be around 15 seconds in the compression sequence |
-| HRS-3 | Slider shall vary compression speed with ADC values                                                                                       |
-| HRS-4 | Heart rate sensor shall detect a stable BPM range for success feedback, and the BPM shall be within +-5 BPM of the true value             |
-| HRS-5 | Compression precision shall be within ±10% of the reported compression cadence                                                            |
-| HRS-6 | The system shall be durable enough for 100+ compressions                                                                                  |
+| HRS-3 | Slider shall vary compression speed with ADC values                                                                                         |
+| HRS-4 | Heart rate sensor shall detect a stable BPM range for success feedback, and the BPM shall be within +-5 BPM of the true value               |
+| HRS-5 | Compression precision shall be within ±10% of the reported compression cadence                                                             |
+| HRS-6 | The system shall be durable enough for 100+ compressions                                                                                    |
 
 ### 7. Bill of Materials (BOM)
 
@@ -158,10 +158,13 @@ Our plan for next week includes finishing the PWM-driven compressions, as well a
 ## MVP Demo
 
 1. Show a system block diagram & explain the hardware implementation.
+
+   ![1745115566603](image/README/1745115566603.png)
+
+   We have a motor that is powered with 24V, which we are using PWM to control the beats per minute. We also currently use a joystick to change the compressions per minute from 100 bpm to 120 bpm, and also to stop the compressions. Additionally, we use an external soundboard to play audio through our speaker, relaying instructions for the user.
 2. Explain your firmware implementation, including application logic and critical drivers you've written.
 
    In our firmware implementation thus far, we've written code for the motor driver (with the encoder capturing the frequency of the compressions), alongside relaying voice instructions. The motor driver involves sending a PWM signal to the motor with a dynamic duty cycle, depending directly on the ADC value received from our input device.
-
 3. Demo your device.
 4. Have you achieved some or all of your Software Requirements Specification (SRS)?
 
@@ -184,18 +187,15 @@ Our plan for next week includes finishing the PWM-driven compressions, as well a
    **SRS-5: Start/stop button pin change interruptions to initiate and emergency stop compressions.** We have not achieved this requirement yet, but it is on our todo-list for this week.
 
    **SRS-6: Polling/interrupting heart rate sensor for stable heart rate.** We have not achieved this requirement yet. Given our other objectives, we will make a judgement call as to whether we will have enough runway to complete this.
-
-6. Have you achieved some or all of your Hardware Requirements Specification (HRS)?
+5. Have you achieved some or all of your Hardware Requirements Specification (HRS)?
 
    **HRS-1:** **Motor and crank mechanism shall produce 1.5 inches of vertical motion.** We've altered this objective to account for our miniature baby doll (which does not compress very far due to its small size), to make the depth 0.75 inches (19mm). Attached is a CAD screenshot showing the depth of the groove of our crank-slider mechanism.
-   
-   <img width="581" alt="PNG image" src="https://github.com/user-attachments/assets/fd779a98-1159-4f63-96bc-62103fc9ed09" />
 
+   <img width="581" alt="PNG image" src="https://github.com/user-attachments/assets/fd779a98-1159-4f63-96bc-62103fc9ed09" />
 
    **HRS-2:** **Speaker shall be audible in a noisy environment (>~70 dB output).** We've achieved this objective. Attached is a screenshot displaying the detected decibel value of Detkin during our audio testing. You can listen to the speaker in action in the videos under SRS-4.
 
 ![IMG_4337](https://github.com/user-attachments/assets/2311e280-9195-4949-bc87-fab6b7d8cf40)
-
 
    **HRS-3: Slider shall vary compression speed with ADC values.** We've achieved this objective. See video under software requirement SRS-3.
 
@@ -212,7 +212,6 @@ Our plan for next week includes finishing the PWM-driven compressions, as well a
    ![1744995033061](image/README/1744995033061.png)
 
    ![1744995051135](image/README/1744995051135.png)
-
 9. What is the riskiest part remaining of your project? How do you plan to de-risk this?
    Although a fairly safe undertaking, the remaining riskiest part of our project lies in integrating the heart rate sensor. Being able to detect an accurate pulse is crucial to be able to know when exactly to stop the compressions. With an incorrect reading, we may prolong or truncate compressions, which, in a real-world scenario, may lead to undesirable outcomes. To de-risk this, we will thoroughly test our heart rate detection procedure.
 10. What questions or help do you need from the teaching team?
