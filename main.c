@@ -6,10 +6,6 @@
 #define F_CPU 16000000UL  // 16 MHz clock frequency.
 #define MOTOR_PIN PB1     // OC1A output pin; used to switch the motor's ground side.
 
-
-#define MAX_DUTY 50
-#define MIN_DUTY 40
-
 #define ENCODER PB0
 
 volatile int tickCount = 0;
@@ -20,25 +16,30 @@ void pwm_init(void) {
     // Configure MOTOR_PIN (PB1) as an output.
     DDRB |= (1 << MOTOR_PIN);
 
-    // Set up Timer/Counter1:
-    // - Fast PWM mode 14: WGM13=1, WGM12=1, WGM11=1, WGM10=0.
-    // - Non-inverting mode on OC1A: COM1A1=1, COM1A0=0.
-    // - Prescaler set to 8 (CS11=1) so that:
-    //    PWM frequency f_PWM = F_CPU / (8 * (1 + TOP)).
-    // With TOP = 99 we get ~20 kHz.
+    // Set up Timer/Counter1 for Fast PWM mode 14 (ICR1 = TOP):
+    //  - WGM13=1, WGM12=1, WGM11=1, WGM10=0
+    //  - Non-inverting on OC1A: COM1A1=1, COM1A0=0
+    //  - Prescaler = 1 (CS10=1)
+    //
+    // With F_CPU = 16 MHz and TOP = 999:
+    //   f_PWM = 16 MHz / (1 * (1 + 999)) ? 16 kHz
+    //    ? 1 000 discrete duty steps
     TCCR1A = (1 << COM1A1) | (1 << WGM11);
-    TCCR1B = (1 << WGM13) | (1 << WGM12) | (1 << CS11);
-    ICR1 = 99;  // Set TOP value for ~20 kHz PWM frequency.
+    TCCR1B = (1 << WGM13)  | (1 << WGM12)
+           | (1 << CS10);    // no prescaling
+
+    ICR1 = 1000;  // TOP = 1000 ? 1001?step resolution
 }
 
-// Set the PWM duty cycle (0 to 100%).
 
-void set_pwm_duty_cycle(uint8_t duty_percent) { // default sets duty to 0, will have motor action.
-    if (duty_percent > 100)
-        duty_percent = 100;
+// Set the PWM duty cycle (0 to 100%). input is 0 to 100.
+
+void set_pwm_duty_cycle(float d) { // default sets duty to 0, will have motor action.
+    if (d < 0)   d = 0;
+    if (d > 100) d = 100;
     
-    // Scale the duty cycle percentage to the PWM range.
-    OCR1A = ((uint16_t)duty_percent * ICR1) / 100;
+    // Scale the duty cycle percentage to the PWM compare match range.
+    OCR1A = (uint16_t)(d * 10);
 }
 
 //// Enable PWM output on OC1A, which in turn switches the motor's ground line.
@@ -52,7 +53,7 @@ static inline void pwm_enable(void) {
 // effectively turning the motor "off".
 static inline void pwm_disable(void) {
     // Clear the PWM output compare settings to turn off OC1A.
-    TCCR1A &= ~((1 << COM1A1) | (1 << COM1A0));
+    TCCR1A &= ~((1 << COM1A1) | (1 << COM1A0)); // why COM1A0 too?
 }
 
 void init_adc() {
@@ -101,14 +102,18 @@ void encoder_init() {
     EICRA |= ((1 << ISC00) | (1 << ISC01)); // rising edge
     EIMSK |= (1 << INT0); // enable int0
     
-    //scale timer 1 down to 15.625kHz
+    //scale timer 3 down to 15.625kHz
     TCCR3B |= ((1 << CS30) | (1 << CS32));
     TCCR3B &= ~(1 << CS31);
     
-//     set timer 1 to normal (just count up, not pwm or CTC)
+//     set timer 3 to normal (just count up, not pwm or CTC)
     TCCR3A &= ~((1 << WGM30) | (1 << WGM31));
     TCCR3B &= ~((1 << WGM32) | (1 << WGM33));
     
+    // enable timer overflow interrupt
+    EIFR  |= (1 << TOV3);     // clear any pending flags
+    TIMSK3 |= (1 << TOIE3); // actually enable
+
     // set timer to 0
     TCNT3 = 0;
     
@@ -123,40 +128,64 @@ volatile int rpmNew = 0;
 volatile int rpmOld = 0;
 
 ISR(TIMER3_OVF_vect) {
-    rpmNew == 0; // no rpm (or below 15)
+    rpmNew = 0; // no rpm (or below 15)
 }
 
-void stop() {
+float duty = 55;
+float Kp = 0.1;
+int error = 0;
+int bpm;
 
-//    if (tickCount > 560) {
-//        set_pwm_duty_cycle(0);
-//        while(tickCount < 1170 && (ADC < 900 && ADC > 100)) {
-//        }
-//        while (tickCount < 2205 && (ADC < 900 && ADC > 100)) {
-//        }
-        pwm_disable();
-//        _delay_ms(1000);
-//    }
+void feedback(int beats) {
+    printf("rpmold%d\n", rpmOld);
+
+    error = beats - rpmOld;
+    duty += error * Kp; // Kp = 0.1
+    if (duty < 33) {
+        duty = 33;
+    }
+    if (duty > 70) {
+        duty = 70;
+    }
+    set_pwm_duty_cycle(duty);
 }
 
 int main(void) {
     // Initialize the PWM hardware.
     
     pwm_init(); // turns on PWM w TOP = 0 but still signal.
-    pwm_disable();
+    pwm_enable();
     init_adc();
     uart_init();
     encoder_init();
+    
+    set_pwm_duty_cycle(duty);
 
     // Pre-set the PWM duty cycle to 50% for the "on" period.
 //    set_pwm_duty_cycle(50, T > 4 sec);
     
     while (1) {
         
+        // target bpm
+        bpm = 100 + ADC / 51;
+//        printf("ADC%d\n", ADC);
+//        printf("bpm%d\n", bpm);
+//
+//        printf("tickCount is %d\n", tickCount);
         if (tickCount >= 1120) {
-            tickCount = 0 + tickCount - 1120;
-            rpmNew = 15625.0 * 60.0 / TCNT3;
+//            printf("tick%d\n", tickCount);
+
+            SREG &= ~(1 << 7); // disable global interrupts
+            
+            uint16_t t = TCNT3; // grab timer, prevent interrupt during calc before reset
             TCNT3 = 0;
+            SREG |= (1 << 7); // enable interrupts
+            
+            rpmNew = 15625.0 * 60.0 / t; // calculate rpm using 15625 hz timer
+//            printf("bpm%d\n", bpm);
+            feedback(bpm);
+            tickCount = 0; // reset tickCount
+
         }
         
         if (rpmNew != rpmOld) {
@@ -165,24 +194,20 @@ int main(void) {
             rpmOld = rpmNew;
         }
         
-        
 
-//        set_pwm_duty_cycle(ADC / 20);
-
-//        MODE: actual // howard eats ass 
         
         
         // every day 
         
-        if (ADC > 1016) { // paddle up
-            pwm_enable();
-            set_pwm_duty_cycle(55);
-        } else if (ADC < 20) {
-            pwm_enable();
-            set_pwm_duty_cycle(41); 
-        } else {
-            stop();
-        }
+//        if (ADC > 1016) { // paddle up
+//            pwm_enable();
+//            set_pwm_duty_cycle(54);
+//        } else if (ADC < 20) {
+//            pwm_enable();
+//            set_pwm_duty_cycle(41); 
+//        } else {
+//            pwm_disable();
+//        }
         
         //MODE: manual tuning
 //        if (ADC > 1016) { // paddle up
