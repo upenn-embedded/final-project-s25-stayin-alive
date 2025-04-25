@@ -369,9 +369,27 @@ int main(void) {
 
            rpmNew = 15625.0 * 60.0 / t; // calculate rpm using 15625 hz timer
            feedback(bpm);
-           tickCount = 0; // reset tickCount
-
            
+           uint16_t value = ADC;
+           
+            if (value < 10 && prev_adc_value > 10) {
+                PORTC |= (1 << STAYIN_ALIVE_AV);  // Set HIGH
+
+            } else if (value > 10) {
+                PORTC &= ~(1 << STAYIN_ALIVE_AV); // Set LOW
+            }
+           
+           
+           if (value > 800 && prev_adc_value < 800) {
+                PORTC |= (1 << TIKTOK_AV);  // Set HIGH
+
+            } else if (value < 800) {
+                PORTC &= ~(1 << TIKTOK_AV); // Set LOW
+            }
+           
+           prev_adc_value = value;
+           
+           tickCount = 0; // reset tickCount
            TCNT3 = 0;
            SREG |= (1 << 7); // enable interrupts
 
