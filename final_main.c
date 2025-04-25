@@ -10,7 +10,7 @@
 
 
 #define F_CPU 16000000UL  // 16 MHz clock frequency.
-#define MOTOR_PIN PD3     // OC1A output pin; used to switch the motor's ground side.
+#define MOTOR_PIN PD1     // OC1A output pin; used to switch the motor's ground side.
 #define COMPRESSION_PIN PC1 // pin change interrupt
 #define ENCODER_PIN PD2
 
@@ -22,31 +22,85 @@
 
 volatile int tickCount = 0;
 volatile int pwmEnabled = 0;
+volatile int prev_adc_value = 0;
+
+
+void pwm_init(void) {
+    // Configure MOTOR_PIN (PB1) as an output.
+    DDRD |= (1 << MOTOR_PIN);
+
+    // Set up Timer/Counter1 for Fast PWM mode 14 (ICR1 = TOP):
+    //  - WGM13=1, WGM12=1, WGM11=1, WGM10=0
+    //  - Non-inverting on OC1A: COM1A1=1, COM1A0=0
+    //  - Prescaler = 1 (CS10=1)
+    //
+    // With F_CPU = 16 MHz and TOP = 999:
+    //   f_PWM = 16 MHz / (1 * (1 + 999)) ? 16 kHz
+    //    ? 1 000 discrete duty steps
+    TCCR4A = (1 << COM4A1) | (1 << WGM41);
+    TCCR4B = (1 << WGM43)  | (1 << WGM42)
+           | (1 << CS40);    // no prescaling
+
+    ICR4 = 1000;  // TOP = 1000 ? 1001?step resolution
+}
 
 // Initialize PWM on Timer1 (mode 14: Fast PWM with ICR1 as TOP)
 // This configuration provides a PWM frequency of approximately 20 kHz.
-void pwm_init(void) {
-    // Configure MOTOR_PIN (PD1) as an output.
-    DDRD |= (1 << MOTOR_PIN);
-
-    // Set up Timer/Counter2 for Fast PWM mode (Mode 3: Fast PWM with OCR2A as TOP):
-    //  - WGM21=1, WGM20=1 (Fast PWM mode)
-    //  - Non-inverting on OC2A: COM2A1=1, COM2A0=0
-    //  - Prescaler = 1 (CS20=1)
-    // 
-    // With F_CPU = 16 MHz and TOP = 255:
-    //   f_PWM = 16 MHz / (1 * (1 + 255)) ? 62.5 kHz (we will adjust the prescaler to get around 20 kHz)
-
-    // Set Fast PWM Mode (WGM21 and WGM20)
-    TCCR2A = (1 << COM2A1) | (1 << WGM21) | (1 << WGM20);  // Non-inverting PWM on OC2A (PD1)
-    TCCR2B = (1 << WGM22) | (1 << CS20); // Fast PWM, prescaler = 1 (no scaling)
-
-    // Set the TOP value (OCR2A) for 20 kHz PWM frequency
-    OCR2A = 255;  // With 16 MHz clock and prescaler 1, 79 gives ~20 kHz (16 MHz / (1 * (79 + 1)) = ~20 kHz)
-    
-    // Set duty cycle to 0% initially
-    OCR2B = 0; // This sets the initial duty cycle (compare match value for the output)
-}
+//void pwm_init(void) {
+//    // Configure MOTOR_PIN (PD1) as an output.
+//    DDRD |= (1 << MOTOR_PIN);
+//
+//    // Set up Timer/Counter2 for Fast PWM mode (Mode 3: Fast PWM with OCR2A as TOP):
+//    //  - WGM21=1, WGM20=1 (Fast PWM mode)
+//    //  - Non-inverting on OC2A: COM2A1=1, COM2A0=0
+//    //  - Prescaler = 1 (CS20=1)
+//    // 
+//    // With F_CPU = 16 MHz and TOP = 255:
+//    //   f_PWM = 16 MHz / (1 * (1 + 255)) ? 62.5 kHz (we will adjust the prescaler to get around 20 kHz)
+//    
+//    // Set Timer 2 in Fast PWM mode, non-inverting
+////    TCCR2A = (1 << COM2B1) | (1 << WGM21) | (1 << WGM20); // Fast PWM, Clearing OC2B on Compare Match, set OC2B at bottom
+////    TCCR2B = (1 << WGM22) | (1 << CS22) | (1 << CS21) | (1 << CS20); // Prescale 8
+////    TCCR2A &= ~((1 << COM2A1) | (1 << COM2A0)); // Ensure OC2A (PB3) is not used
+//    
+//    // prescale by 64
+//    TCCR0B |= (1 << CS01) | (1 << CS00);
+//    
+//    // timer0, fast PWM mode (Mode 3)
+//    TCCR0A |= (1 << WGM00) | (1 << WGM01);
+//    TCCR0B &= ~(1 << WGM02);
+//    
+//    // 
+//    TCCR0A |= (1 << COM0A1) | (1 << COM0B1);
+//    TCCR0A &= ~((1 << COM0A0) | (1 << COM0B0));
+//        
+//    OCR0A = 200;
+//    OCR0B = 200 * 1/4;
+//    
+////    TCCR0B |= (1 << CS00);
+////    
+////    TCCR0A |= (1 << WGM00) | (1 << WGM01);
+////    TCCR0B |= (1 << WGM01);
+////            
+////    OCR0A = 39;
+////    OCR0B = OCR0A * 1/4;
+////    
+////    TCCR0A |= (1 << COM0B1);
+//     
+////     sei();
+//    
+//    
+//    
+////    // Set Fast PWM Mode (WGM21 and WGM20)
+////    TCCR2A = (1 << COM2A1) | (1 << WGM21);  // Non-inverting PWM on OC2B (PD3)
+////    TCCR2B = (1 << WGM13) | (1 << WGM22) | (1 << CS20); // Fast PWM, prescaler = 1 (no scaling)
+////
+////    // Set the TOP value (OCR2A) for 20 kHz PWM frequency
+////    OCR2A = 255;  // With 16 MHz clock and prescaler 1, 79 gives ~20 kHz (16 MHz / (1 * (79 + 1)) = ~20 kHz)
+////    
+////    // Set duty cycle to 0% initially
+////    OCR2B = 10; // This sets the initial duty cycle (compare match value for the output)
+//}
 
 
 void init_compressions_button() {
@@ -63,36 +117,61 @@ void init_compressions_button() {
 
 // Set the PWM duty cycle (0 to 100%). input is 0 to 100.
 
-// Set the PWM duty cycle (0 to 100%). Input is 0 to 100.
-void set_pwm_duty_cycle(float d) {
+//// Set the PWM duty cycle (0 to 100%). Input is 0 to 100.
+//void set_pwm_duty_cycle(float d) {
+//    if (d < 0)   d = 0;
+//    if (d > 100) d = 100;
+//    
+//    // Scale the duty cycle percentage to the PWM compare match range (OCR2A)
+//    OCR2B = (uint8_t)(d * (OCR2A + 1) / 100);  // Map the duty cycle to the OCR2B range
+//}
+//
+//// Enable PWM output on OC2A (PD1), which in turn switches the motor's ground line.
+//static inline void pwm_enable(void) {
+//    // Enable non-inverting output on OC2A (PD1).
+//    TCCR2A |= (1 << COM2A1);  // Set COM2A1 to enable non-inverting PWM on OC2A
+//    TCCR2A &= ~(1 << COM2A0); // Clear COM2A0 to ensure non-inverting mode
+//}
+//
+//// Disable PWM output on OC2A (PD1). The motor's ground line is disconnected,
+//// effectively turning the motor "off".
+//static inline void pwm_disable(void) {
+//    // Clear the PWM output compare settings to turn off OC2A (PD1).
+//    TCCR2A &= ~((1 << COM2A1) | (1 << COM2A0)); // Clear both COM2A1 and COM2A0
+//}
+
+void set_pwm_duty_cycle(float d) { // default sets duty to 0, will have motor action.
     if (d < 0)   d = 0;
     if (d > 100) d = 100;
     
-    // Scale the duty cycle percentage to the PWM compare match range (OCR2A)
-    OCR2B = (uint8_t)(d * (OCR2A + 1) / 100);  // Map the duty cycle to the OCR2B range
+    // Scale the duty cycle percentage to the PWM compare match range.
+    OCR4A = (uint16_t)(d * 10);
 }
 
-// Enable PWM output on OC2A, which in turn switches the motor's ground line.
+//// Enable PWM output on OC1A, which in turn switches the motor's ground line.
+//// This function is used to "turn on" the motor.
 static inline void pwm_enable(void) {
-    // Re-enable non-inverting output on OC2A (PD3).
-    TCCR2A |= (1 << COM2A1);
+    // Re-enable non-inverting output on OC1A.
+    TCCR4A |= (1 << COM4A1);
 }
 
-// Disable PWM output on OC2A. The motor's ground line is disconnected,
+// Disable PWM output on OC1A. The motor's ground line is disconnected,
 // effectively turning the motor "off".
 static inline void pwm_disable(void) {
-    // Clear the PWM output compare settings to turn off OC2A.
-    TCCR2A &= ~((1 << COM2A1) | (1 << COM2A0)); // Clear both COM2A1 and COM2A0
+    // Clear the PWM output compare settings to turn off OC1A.
+    TCCR4A &= ~((1 << COM4A1) | (1 << COM4A0)); // why COM1A0 too?
 }
+
 
 ISR(PCINT1_vect) {
     static uint8_t lastButtonState = 1;
+    printf("button pressed\n");
     
 
     // Read current state of PB1
-    uint8_t startState = (PINB & (1 << COMPRESSION_PIN)) >> COMPRESSION_PIN;
+    uint8_t startState = (PINC & (1 << COMPRESSION_PIN)) >> COMPRESSION_PIN;
     _delay_ms(50);
-    uint8_t currentState = (PINB & (1 << COMPRESSION_PIN)) >> COMPRESSION_PIN;
+    uint8_t currentState = (PINC & (1 << COMPRESSION_PIN)) >> COMPRESSION_PIN;
     if (startState != currentState) return;
         
     // Detect falling edge (button press)
@@ -175,7 +254,7 @@ void encoder_init() {
     // set timer to 0
     TCNT3 = 0;
     
-//    sei();
+    sei();
 }
 
 ISR(INT0_vect) {
@@ -247,13 +326,15 @@ void int_to_char_array(int num, char* str) {
 
 int main(void) {
     // Initialize the PWM hardware.
+//    PRR0 |= (1 << PRUSART0);
+    
     lcd_init();
     
     char bpm_string[20];  // Make sure the char array is large enough to hold the string representation
     pwm_init(); // turns on PWM w TOP = 0 but still signal.
 //    pwm_enable();
     init_adc();
-    uart_init();
+//    uart_init();
     encoder_init();
 
     init_compressions_button();
@@ -261,17 +342,13 @@ int main(void) {
     
     set_pwm_duty_cycle(duty);
     pwm_disable();
-    
-//    SREG &= ~(1 << 7); // disable global interrupts
-    LCD_setScreen(BLACK);
-//    SREG |= (1 << 7); // enable interrupts
-    
-    strcpy(bpm_string, "hello");
-    
+//    pwm_enable();
     
     SREG &= ~(1 << 7); // disable global interrupts
-    LCD_drawString(34, 60, bpm_string, WHITE, 0);
+    LCD_setScreen(BLACK);        
     SREG |= (1 << 7); // enable interrupts
+    
+    PORTC &= ~(1 << TIKTOK_AV); // Set PB4 LOW
     
 
    while (1) {
@@ -283,46 +360,34 @@ int main(void) {
        if (tickCount >= 1120) {
 
            SREG &= ~(1 << 7); // disable global interrupts
-           
            uint16_t t = TCNT3; // grab timer, prevent interrupt during calc before reset
-           TCNT3 = 0;
-           SREG |= (1 << 7); // enable interrupts
            
+           // printing here
+           int_to_char_array(bpm, bpm_string);
+           strcat(bpm_string, " CPM");
+           LCD_drawString(34, 60, bpm_string, WHITE, 0);
+
            rpmNew = 15625.0 * 60.0 / t; // calculate rpm using 15625 hz timer
            feedback(bpm);
            tickCount = 0; // reset tickCount
 
+           
+           TCNT3 = 0;
+           SREG |= (1 << 7); // enable interrupts
+
+
        }
        
        if (rpmNew != rpmOld) {
-            printf("Compression RPM: %d\n", rpmNew);
            
             rpmOld = rpmNew;
-           
-            if (rpmNew < 102) {
-                PORTC |= (1 << STAYIN_ALIVE_AV);  // Set PB3 HIGH
-            } else {
-                PORTC &= ~(1 << STAYIN_ALIVE_AV); // Set PB3 LOW
-            }
 
-            if (rpmNew > 118) {
-                PORTC |= (1 << TIKTOK_AV);  // Set PB4 HIGH
-
-            } else {
-                PORTC &= ~(1 << TIKTOK_AV); // Set PB4 LOW
-            }
-           
        }
        
-       printf("ADC value: %d\n", ADC);
+//       printf("ADC value: %d\n", ADC);
        
        // Convert the integer to a string
        
-       int_to_char_array(bpm, bpm_string);
-       strcat(bpm_string, " CPM");
-       SREG &= ~(1 << 7); // disable global interrupts
-       LCD_drawString(34, 60, bpm_string, WHITE, 0);
-       SREG |= (1 << 7); // enable interrupts
 
        
        for (int i = 0; i < 20; i++) {
