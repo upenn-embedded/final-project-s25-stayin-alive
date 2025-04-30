@@ -10,9 +10,28 @@ Watch the demo below:
 
 {% include youtube.html id="kBenaHzO5P8" %}
 
-## Images
-![alt text](IMG_8390.jpg)
-![alt text](image.png)
+### Image Gallery
+
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+
+  <div>
+    <img src="IMG_8299.jpg" alt="Speaker Wiring" style="width: 100%;">
+  </div>
+
+  <div>
+    <img src="IMG_8391.jpg" alt="Top View" style="width: 100%;">
+  </div>
+
+  <div>
+    <img src="IMG_8430.jpg" alt="Wiring" style="width: 100%;">
+  </div>
+
+  <div>
+    <img src="IMG_9343.jpg" alt="Overview" style="width: 100%;">
+  </div>
+
+</div>
+
 
 
 ## 3. Results
