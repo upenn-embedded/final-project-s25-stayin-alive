@@ -6,4 +6,4 @@ layout: default
 
 This is our GitHub Pages site for the baby CPR machine. Watch the demo below:
 
-{% include youtube.html id="kBenaHzO5P8" %}
+<!-- {% include youtube.html id="kBenaHzO5P8" %} -->
