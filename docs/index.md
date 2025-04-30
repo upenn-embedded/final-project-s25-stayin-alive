@@ -15,9 +15,9 @@ Watch the demo below:
 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
 
   <div>
-    <img src="IMG_8299.jpg" alt="Speaker Wiring" style="width: 100%;">
+    <img src="IMG_9343.jpg" alt="Overview" style="width: 100%;">
   </div>
-
+  
   <div>
     <img src="IMG_8391.jpg" alt="Top View" style="width: 100%;">
   </div>
@@ -27,7 +27,7 @@ Watch the demo below:
   </div>
 
   <div>
-    <img src="IMG_9343.jpg" alt="Overview" style="width: 100%;">
+    <img src="IMG_8299.jpg" alt="Speaker Wiring" style="width: 100%;">
   </div>
 
 </div>
