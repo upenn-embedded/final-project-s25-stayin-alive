@@ -2,7 +2,7 @@
 layout: default
 ---
 
-# Baby CPR Project
+# Baby CPR
 Created by Shruti Agarwal, Howard Xu, Zora Mardjoko
 
 We are excited to present our functional baby CPR training device that automates chest compressions using a motorized crank-slider mechanism, with adjustable compression speed and synchronized audio instructions. 
@@ -31,7 +31,7 @@ We successfully implemented motor-based CPR compressions with dynamic BPM contro
 | SRS-5  | Start/stop button using pin change interrupts                                                                                                         | **Achieved**. Button works to start and stop compressions. See [demo video](https://youtube.com/shorts/kBenaHzO5P8).                                                                                                                                                     |
 | SRS-6  | Polling or interrupting heart rate sensor for stable BPM                                                                                              | **Not achieved**. We pivoted to implementing an LCD screen for the project SPI communication.                                                                                                                        |
 
----
+
 
 ### 3.2 Hardware Requirements Specification (HRS) Results
 
